@@ -83,7 +83,7 @@ p <- ggplot(grid_row, aes(phi, h)) +
 p
 ```
 
-![](plotsphihs-1.pdf)<!-- -->
+![](README_files/figure-gfm/phihs-1.png)<!-- -->
 
 ``` r
 pdf("plots/phiH.pdf", width = 5, height = 5)
@@ -91,7 +91,7 @@ p
 dev.off()
 ```
 
-    ## pdf 
+    ## png 
     ##   2
 
 ## FA model
@@ -488,7 +488,7 @@ xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
 dev.off()
 ```
 
-    ## pdf 
+    ## png 
     ##   2
 
 ``` r
@@ -496,4 +496,4 @@ plot(as.matrix(c), fmt.cell='%.2f', main = "", key = NULL,
 xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
 ```
 
-![](plotsunnamed-chunk-7-1.pdf)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->

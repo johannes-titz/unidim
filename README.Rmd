@@ -12,12 +12,6 @@ This analysis accompanies the paper: Titz, J. Are psychologists constructing the
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = F,
-                      dev = c("cairo_pdf", "png"),
-                      fig.path = "plots",
-                      dev.args = list(antialias = "subpixel"),
-                      dpi = 300,
-                      echo = TRUE,
-                      fig.height = 4.365, fig.width = 4.85,
                       options(width = 82))
 ```
 
