@@ -1,0 +1,212 @@
+---
+title: "Analysis for Titz: Are psychologists constructing their scales in the right way..."
+author: "Johannes Titz"
+date: "04/27/2023"
+#original date: "2/23/2022"
+output:
+  html_document:
+    toc: true
+---
+
+This analysis accompanies the paper: Titz, J. Are psychologists constructing their scales in the right way? Insights from studying perfect unidimensionality.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = F,
+                      dev = c("cairo_pdf", "png"),
+                      fig.path = "plots",
+                      dev.args = list(antialias = "subpixel"),
+                      dpi = 300,
+                      echo = TRUE,
+                      fig.height = 4.365, fig.width = 4.85,
+                      options(width = 82))
+```
+
+# Part I: Theory
+
+## Prepare
+
+I use librarian to manage dependencies, so please install it if you do not have it yet (uncomment the first line).
+
+```{r prepare}
+# install.packages("librarian")
+library(librarian)
+shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, Matrix, plot.matrix)
+# use multiple cores
+cores <- round(parallel::detectCores() * 0.8)
+# create vectors from phi matrix
+vec_from_tbl <- function(a, b, c, d) {
+  mtrx <- matrix(c(a, b, c, d), ncol = 2)
+  v1 <- rep(c(0, 1), colSums(mtrx))
+  v2 <- rep(c(0, 1), rowSums(mtrx))
+  cbind(v1, v2)
+}
+```
+
+## Generate Data
+
+```{r generate, cache = F}
+n <- 200
+# all combos, even the ones where phi is NA
+grid <- as.matrix(t(compositions(n = n, m = 4)))
+colnames(grid) <- paste0("Var", 1:4)
+# rowwise does not work with the following code, I do not know why
+# multiple cores seem to give no advantage, so is not used (argument cl)
+# we cache this manually as it takes some time
+grid <- xfun::cache_rds({
+  grid <- as_tibble(grid) %>%
+    rowwise() %>%
+    mutate(errors = Var3,
+           expected_errors = (Var1 + Var3) * (Var3 + Var4) / (Var1+ Var2+ Var3+ Var4),
+           h = 1 - errors / expected_errors)
+  phi <- pbapply(grid[, 1:4], 1, function(x) phi(x, digits = 4))
+  cbind(grid, phi)
+}, file = "sim1", rerun = F)
+grid <- as_tibble(grid)
+```
+
+```{r filter}
+grid_unidim <-  grid %>%
+  filter(Var3 == 0) # only unidimensional
+grid_row <- grid %>%
+  filter(phi >= 0, Var2 >= Var3) # error cell is b
+```
+
+## Plot
+
+```{r phihs}
+p <- ggplot(grid_row, aes(phi, h)) + 
+  #geom_point(alpha = 0.05) +
+  geom_hex(bins = 100, show.legend = FALSE) + 
+  theme_classic() +
+  scale_x_continuous("Phi", breaks = seq(0, 1, 0.1)) + 
+  scale_y_continuous("H", breaks = seq(0, 1, 0.1) ) + 
+  coord_fixed()
+p
+pdf("plots/phiH.pdf", width = 5, height = 5)
+p
+dev.off()
+```
+
+## FA model
+
+It is not hard to create unidimensional model that results in a perfect bifactor solution with factor analysis (for Pearson Correlation):
+
+```{r}
+m1 <- vec_from_tbl(10, 80, 0, 10)
+m2 <- vec_from_tbl(11, 78, 0, 11)
+m3 <- vec_from_tbl(15, 70, 0, 15)
+
+d <- cbind(m1, m2, m3[, -2])
+# check that it is really unidimensional
+zysnotize(d)
+
+ncol <- ncol(d)
+colnames(d) <- paste("Item", seq(ncol(d)))
+f1 <- factanal(d, 1)
+f2 <- factanal(d, 2)
+
+f1$loadings
+f2$loadings
+print(xtable::xtable(cbind(f1$loadings, f2$loadings), label = "tab:fa1b", 
+                     caption = "Cross tables of five unidimensional items"),
+      file = "tables/fa1b.tex", booktabs = TRUE)
+
+combs <- Map(function(x, y) table(d[, x], d[, y]),
+             rep(1:ncol, each = ncol), rep(1:ncol, ncol))
+lower <- seq(1, 21, 5)
+upper <- seq(5, 25, 5)
+res <- Map(function(x, y) Reduce(cbind, combs[x:y]),
+    lower, upper)
+res2 <- Reduce(rbind, res)
+colnames(res2) <- paste0("$", rep(1:5, each = 2), "_", c(0, 1), "$")
+rownames(res2) <- paste0("$", rep(1:5, each = 2), "_", c(0, 1), "$")
+
+res2
+print(xtable::xtable(res2, label = "tab:fa1",
+                     caption = "Example of factor analysis for five unidimensional items"),
+      booktabs = TRUE,
+      file = "tables/fa1.tex",
+      sanitize.text.function = function(x) {x})
+```
+
+# Part II: Empirical Example
+
+Load data
+
+```{r}
+d <- read.csv2("data.csv")
+```
+
+Find order, calculate socre, show df
+
+```{r}
+o <- order(colMeans(d[,-1]), decreasing = TRUE)
+d <- d[, c(1, o+1)]
+d$score <- rowSums(d[, -1])
+df <- as.data.frame(d)
+df[order(df$score), ]
+```
+
+### Violations
+
+```{r}
+is_monotonic <- function(x) {
+  all(diff(as.numeric(x)) <= 0)
+}
+
+df$monotonic <- apply(df[, 2:6], 1, is_monotonic)
+dg <- df[df$monotonic == FALSE, ]
+
+dh <- dg[order(dg$score), ]
+dh
+print(
+      xtable::xtable(dh[, 2:7], caption = "Participant answers that violate unidimensionality", 
+                     label = "tab:viol", digits = 0),
+      booktabs = TRUE,
+      file = "tables/viol.tex"
+)
+```
+
+### unidim analysis
+
+```{r}
+lv <- loevenize(as.matrix(d[, 2:6]))
+lv
+```
+
+### FA
+
+```{r}
+
+fa1 <- factanal(d[,c(-1, -7)], 1)
+fa2 <- factanal(d[,c(-1, -7)], 2)
+
+tab <- cbind(unclass(loadings(fa1)), unclass(loadings(fa2)))
+print(
+      xtable::xtable(tab, caption = "Factor analysis",
+                     label = "tab:fa2", digits = 3),
+      booktabs = TRUE,
+      file = "tables/fa2.tex"
+)
+tab
+```
+
+### plot
+
+```{r}
+tab <- round(cor(d[, -c(1, 7)]), 2)
+
+a <- tril(lv$h_matrix, -1) # strict lower triangular matrix (omit diagonals)
+b <- triu(tab, 1) # strict upper triangular matrix
+c <- a + b
+diag(c) <- NA
+
+pdf("plots/itempairs.pdf", width = 7, height = 7)
+plot(as.matrix(c), fmt.cell='%.2f', main = "", key = NULL,
+xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
+dev.off()
+
+plot(as.matrix(c), fmt.cell='%.2f', main = "", key = NULL,
+xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
+```
+
