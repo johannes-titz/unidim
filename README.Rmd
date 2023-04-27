@@ -4,7 +4,7 @@ author: "Johannes Titz"
 date: "04/27/2023"
 #original date: "2/23/2022"
 output:
-  html_document:
+  github_document:
     toc: true
 ---
 
