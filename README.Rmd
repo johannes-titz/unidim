@@ -166,6 +166,7 @@ print(
 ```{r}
 lv <- loevenize(as.matrix(d[, 2:6]))
 lv
+1-c(23, 18, 12)/ lv$sum_expected_errors
 ```
 
 ### FA
