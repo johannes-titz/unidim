@@ -1,32 +1,25 @@
-Analysis for Titz: Are psychologists constructing their scales in the
-right way…
-================
-Johannes Titz
-04/27/2023
+---
+title: "Analysis for Titz: Are psychologists constructing their scales in the right way..."
+author: "Johannes Titz"
+date: "04/27/2023"
+#original date: "2/23/2022"
+output:
+  github_document:
+    toc: true
+---
 
-- [Part I: Theory](#part-i-theory)
-  - [Prepare](#prepare)
-  - [Generate Data](#generate-data)
-  - [Plot](#plot)
-  - [FA model](#fa-model)
-- [Part II: Empirical Example](#part-ii-empirical-example)
-  - [Violations](#violations)
-  - [unidim analysis](#unidim-analysis)
-  - [FA](#fa)
-  - [plot](#plot-1)
+This analysis accompanies the paper: Titz, J. Are psychologists constructing their scales in the right way? Insights from studying perfect unidimensionality.
 
-This analysis accompanies the paper: Titz, J. Are psychologists
-constructing their scales in the right way? Insights from studying
-perfect unidimensionality.
+
 
 # Part I: Theory
 
 ## Prepare
 
-I use librarian to manage dependencies, so please install it if you do
-not have it yet (uncomment the first line).
+I use librarian to manage dependencies, so please install it if you do not have it yet (uncomment the first line).
 
-``` r
+
+```r
 # install.packages("librarian")
 library(librarian)
 shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, Matrix, plot.matrix)
@@ -43,7 +36,8 @@ vec_from_tbl <- function(a, b, c, d) {
 
 ## Generate Data
 
-``` r
+
+```r
 n <- 200
 # all combos, even the ones where phi is NA
 grid <- as.matrix(t(compositions(n = n, m = 4)))
@@ -63,7 +57,8 @@ grid <- xfun::cache_rds({
 grid <- as_tibble(grid)
 ```
 
-``` r
+
+```r
 grid_unidim <-  grid %>%
   filter(Var3 == 0) # only unidimensional
 grid_row <- grid %>%
@@ -72,7 +67,8 @@ grid_row <- grid %>%
 
 ## Plot
 
-``` r
+
+```r
 p <- ggplot(grid_row, aes(phi, h)) + 
   #geom_point(alpha = 0.05) +
   geom_hex(bins = 100, show.legend = FALSE) + 
@@ -83,23 +79,25 @@ p <- ggplot(grid_row, aes(phi, h)) +
 p
 ```
 
-![](README_files/figure-gfm/phihs-1.png)<!-- -->
+![plot of chunk phihs](figure/phihs-1.png)
 
-``` r
+```r
 pdf("plots/phiH.pdf", width = 5, height = 5)
 p
 dev.off()
 ```
 
-    ## png 
-    ##   2
+```
+## png 
+##   2
+```
 
 ## FA model
 
-It is not hard to create unidimensional model that results in a perfect
-bifactor solution with factor analysis (for Pearson Correlation):
+It is not hard to create unidimensional model that results in a perfect bifactor solution with factor analysis (for Pearson Correlation):
 
-``` r
+
+```r
 m1 <- vec_from_tbl(10, 80, 0, 10)
 m2 <- vec_from_tbl(11, 78, 0, 11)
 m3 <- vec_from_tbl(15, 70, 0, 15)
@@ -109,40 +107,42 @@ d <- cbind(m1, m2, m3[, -2])
 zysnotize(d)
 ```
 
-    ## $error_matrix
-    ##      [,1] [,2] [,3] [,4] [,5]
-    ## [1,]    0    0    0    0    0
-    ## [2,]    0    0    0    0    0
-    ## [3,]    0    0    0    0    0
-    ## [4,]    0    0    0    0    0
-    ## [5,]    0    0    0    0    0
-    ## 
-    ## $expected_error_matrix
-    ##        [,1]   [,2]     [,3]     [,4]     [,5]
-    ## [1,]  81.00  81.00  88.1100  88.1100 114.7500
-    ## [2,]  81.00  81.00  88.1100  88.1100 114.7500
-    ## [3,]  88.11  88.11  95.8441  95.8441 124.8225
-    ## [4,]  88.11  88.11  95.8441  95.8441 124.8225
-    ## [5,] 114.75 114.75 124.8225 124.8225 162.5625
-    ## 
-    ## $scalability_matrix
-    ##      [,1] [,2] [,3] [,4] [,5]
-    ## [1,]    1    1    1    1    1
-    ## [2,]    1    1    1    1    1
-    ## [3,]    1    1    1    1    1
-    ## [4,]    1    1    1    1    1
-    ## [5,]    1    1    1    1    1
-    ## 
-    ## $scalability
-    ## [1] 1
-    ## 
-    ## $sum_errors
-    ## [1] 0
-    ## 
-    ## $sum_expected_errors
-    ## [1] 2016.858
+```
+## $error_matrix
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    0    0    0    0    0
+## [2,]    0    0    0    0    0
+## [3,]    0    0    0    0    0
+## [4,]    0    0    0    0    0
+## [5,]    0    0    0    0    0
+## 
+## $expected_error_matrix
+##        [,1]   [,2]     [,3]     [,4]     [,5]
+## [1,]  81.00  81.00  88.1100  88.1100 114.7500
+## [2,]  81.00  81.00  88.1100  88.1100 114.7500
+## [3,]  88.11  88.11  95.8441  95.8441 124.8225
+## [4,]  88.11  88.11  95.8441  95.8441 124.8225
+## [5,] 114.75 114.75 124.8225 124.8225 162.5625
+## 
+## $scalability_matrix
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    1    1    1    1
+## [2,]    1    1    1    1    1
+## [3,]    1    1    1    1    1
+## [4,]    1    1    1    1    1
+## [5,]    1    1    1    1    1
+## 
+## $scalability
+## [1] 1
+## 
+## $sum_errors
+## [1] 0
+## 
+## $sum_expected_errors
+## [1] 2016.858
+```
 
-``` r
+```r
 ncol <- ncol(d)
 colnames(d) <- paste("Item", seq(ncol(d)))
 f1 <- factanal(d, 1)
@@ -151,38 +151,42 @@ f2 <- factanal(d, 2)
 f1$loadings
 ```
 
-    ## 
-    ## Loadings:
-    ##        Factor1
-    ## Item 1 0.950  
-    ## Item 2 0.119  
-    ## Item 3 0.997  
-    ## Item 4 0.125  
-    ## Item 5 0.839  
-    ## 
-    ##                Factor1
-    ## SS loadings      2.632
-    ## Proportion Var   0.526
+```
+## 
+## Loadings:
+##        Factor1
+## Item 1 0.950  
+## Item 2 0.119  
+## Item 3 0.997  
+## Item 4 0.125  
+## Item 5 0.839  
+## 
+##                Factor1
+## SS loadings      2.632
+## Proportion Var   0.526
+```
 
-``` r
+```r
 f2$loadings
 ```
 
-    ## 
-    ## Loadings:
-    ##        Factor1 Factor2
-    ## Item 1 0.950          
-    ## Item 2         0.946  
-    ## Item 3 0.997          
-    ## Item 4         0.993  
-    ## Item 5 0.837          
-    ## 
-    ##                Factor1 Factor2
-    ## SS loadings      2.617   1.886
-    ## Proportion Var   0.523   0.377
-    ## Cumulative Var   0.523   0.900
+```
+## 
+## Loadings:
+##        Factor1 Factor2
+## Item 1 0.950          
+## Item 2         0.946  
+## Item 3 0.997          
+## Item 4         0.993  
+## Item 5 0.837          
+## 
+##                Factor1 Factor2
+## SS loadings      2.617   1.886
+## Proportion Var   0.523   0.377
+## Cumulative Var   0.523   0.900
+```
 
-``` r
+```r
 print(xtable::xtable(cbind(f1$loadings, f2$loadings), label = "tab:fa1b", 
                      caption = "Cross tables of five unidimensional items"),
       file = "tables/fa1b.tex", booktabs = TRUE)
@@ -200,19 +204,21 @@ rownames(res2) <- paste0("$", rep(1:5, each = 2), "_", c(0, 1), "$")
 res2
 ```
 
-    ##       $1_0$ $1_1$ $2_0$ $2_1$ $3_0$ $3_1$ $4_0$ $4_1$ $5_0$ $5_1$
-    ## $1_0$    90     0    10    80    89     1    11    79    85     5
-    ## $1_1$     0    10     0    10     0    10     0    10     0    10
-    ## $2_0$    10     0    10     0    10     0    10     0    10     0
-    ## $2_1$    80    10     0    90    79    11     1    89    75    15
-    ## $3_0$    89     0    10    79    89     0    11    78    85     4
-    ## $3_1$     1    10     0    11     0    11     0    11     0    11
-    ## $4_0$    11     0    10     1    11     0    11     0    11     0
-    ## $4_1$    79    10     0    89    78    11     0    89    74    15
-    ## $5_0$    85     0    10    75    85     0    11    74    85     0
-    ## $5_1$     5    10     0    15     4    11     0    15     0    15
+```
+##       $1_0$ $1_1$ $2_0$ $2_1$ $3_0$ $3_1$ $4_0$ $4_1$ $5_0$ $5_1$
+## $1_0$    90     0    10    80    89     1    11    79    85     5
+## $1_1$     0    10     0    10     0    10     0    10     0    10
+## $2_0$    10     0    10     0    10     0    10     0    10     0
+## $2_1$    80    10     0    90    79    11     1    89    75    15
+## $3_0$    89     0    10    79    89     0    11    78    85     4
+## $3_1$     1    10     0    11     0    11     0    11     0    11
+## $4_0$    11     0    10     1    11     0    11     0    11     0
+## $4_1$    79    10     0    89    78    11     0    89    74    15
+## $5_0$    85     0    10    75    85     0    11    74    85     0
+## $5_1$     5    10     0    15     4    11     0    15     0    15
+```
 
-``` r
+```r
 print(xtable::xtable(res2, label = "tab:fa1",
                      caption = "Example of factor analysis for five unidimensional items"),
       booktabs = TRUE,
@@ -224,13 +230,19 @@ print(xtable::xtable(res2, label = "tab:fa1",
 
 Load data
 
-``` r
-d <- read.csv2("data.csv")
+
+```r
+dorig <- read.csv2("data.csv")
+d <- dorig %>%
+  select(id, item_nmbr, correctness) %>%
+  pivot_wider(names_from = item_nmbr, values_from = correctness)
+```
 ```
 
 Find order, calculate socre, show df
 
-``` r
+
+```r
 o <- order(colMeans(d[,-1]), decreasing = TRUE)
 d <- d[, c(1, o+1)]
 d$score <- rowSums(d[, -1])
@@ -238,144 +250,147 @@ df <- as.data.frame(d)
 df[order(df$score), ]
 ```
 
-    ##      id X1 X4 X3 X2 X5 score
-    ## 13   13  0  0  0  0  0     0
-    ## 22   22  0  0  0  0  0     0
-    ## 46   46  0  0  0  0  0     0
-    ## 51   51  0  0  0  0  0     0
-    ## 54   54  0  0  0  0  0     0
-    ## 57   57  0  0  0  0  0     0
-    ## 64   64  0  0  0  0  0     0
-    ## 66   66  0  0  0  0  0     0
-    ## 73   73  0  0  0  0  0     0
-    ## 80   80  0  0  0  0  0     0
-    ## 85   85  0  0  0  0  0     0
-    ## 94   94  0  0  0  0  0     0
-    ## 97   97  0  0  0  0  0     0
-    ## 99   99  0  0  0  0  0     0
-    ## 101 101  0  0  0  0  0     0
-    ## 104 104  0  0  0  0  0     0
-    ## 116 116  0  0  0  0  0     0
-    ## 121 121  0  0  0  0  0     0
-    ## 126 126  0  0  0  0  0     0
-    ## 133 133  0  0  0  0  0     0
-    ## 17   17  1  0  0  0  0     1
-    ## 40   40  1  0  0  0  0     1
-    ## 41   41  0  0  0  0  1     1
-    ## 70   70  1  0  0  0  0     1
-    ## 108 108  0  0  1  0  0     1
-    ## 2     2  1  1  0  0  0     2
-    ## 5     5  1  1  0  0  0     2
-    ## 7     7  1  1  0  0  0     2
-    ## 8     8  0  0  1  1  0     2
-    ## 9     9  1  1  0  0  0     2
-    ## 18   18  1  1  0  0  0     2
-    ## 26   26  1  1  0  0  0     2
-    ## 29   29  1  1  0  0  0     2
-    ## 37   37  1  1  0  0  0     2
-    ## 56   56  1  1  0  0  0     2
-    ## 65   65  1  1  0  0  0     2
-    ## 74   74  1  1  0  0  0     2
-    ## 76   76  0  0  1  1  0     2
-    ## 81   81  1  1  0  0  0     2
-    ## 86   86  1  1  0  0  0     2
-    ## 89   89  1  0  1  0  0     2
-    ## 93   93  1  1  0  0  0     2
-    ## 100 100  1  1  0  0  0     2
-    ## 107 107  1  1  0  0  0     2
-    ## 113 113  1  1  0  0  0     2
-    ## 120 120  1  0  0  1  0     2
-    ## 123 123  1  1  0  0  0     2
-    ## 15   15  1  1  1  0  0     3
-    ## 34   34  1  1  1  0  0     3
-    ## 36   36  1  1  0  1  0     3
-    ## 45   45  1  1  1  0  0     3
-    ## 47   47  1  1  1  0  0     3
-    ## 61   61  1  1  1  0  0     3
-    ## 83   83  1  1  1  0  0     3
-    ## 109 109  1  1  1  0  0     3
-    ## 112 112  1  1  1  0  0     3
-    ## 117 117  1  1  0  0  1     3
-    ## 128 128  1  1  1  0  0     3
-    ## 1     1  1  1  1  1  0     4
-    ## 4     4  1  1  1  1  0     4
-    ## 10   10  1  1  1  1  0     4
-    ## 12   12  1  1  1  1  0     4
-    ## 14   14  1  1  1  1  0     4
-    ## 20   20  1  1  1  1  0     4
-    ## 23   23  1  1  1  1  0     4
-    ## 24   24  1  1  1  1  0     4
-    ## 25   25  1  1  1  1  0     4
-    ## 30   30  1  1  1  1  0     4
-    ## 31   31  1  1  1  1  0     4
-    ## 32   32  1  1  1  1  0     4
-    ## 33   33  1  1  1  1  0     4
-    ## 35   35  1  1  1  1  0     4
-    ## 42   42  1  1  1  1  0     4
-    ## 43   43  1  1  1  1  0     4
-    ## 49   49  1  1  1  1  0     4
-    ## 53   53  1  1  1  1  0     4
-    ## 55   55  1  1  1  1  0     4
-    ## 62   62  1  1  1  1  0     4
-    ## 63   63  1  1  1  1  0     4
-    ## 68   68  1  1  1  1  0     4
-    ## 79   79  1  1  1  1  0     4
-    ## 84   84  1  1  1  1  0     4
-    ## 87   87  1  1  1  1  0     4
-    ## 95   95  1  1  1  1  0     4
-    ## 98   98  1  1  1  1  0     4
-    ## 102 102  1  1  1  1  0     4
-    ## 103 103  1  1  1  1  0     4
-    ## 106 106  1  1  1  1  0     4
-    ## 110 110  1  1  1  1  0     4
-    ## 118 118  1  1  1  1  0     4
-    ## 124 124  1  1  1  1  0     4
-    ## 127 127  1  1  1  1  0     4
-    ## 130 130  1  1  1  1  0     4
-    ## 131 131  1  1  1  1  0     4
-    ## 3     3  1  1  1  1  1     5
-    ## 6     6  1  1  1  1  1     5
-    ## 11   11  1  1  1  1  1     5
-    ## 16   16  1  1  1  1  1     5
-    ## 19   19  1  1  1  1  1     5
-    ## 21   21  1  1  1  1  1     5
-    ## 27   27  1  1  1  1  1     5
-    ## 28   28  1  1  1  1  1     5
-    ## 38   38  1  1  1  1  1     5
-    ## 39   39  1  1  1  1  1     5
-    ## 44   44  1  1  1  1  1     5
-    ## 48   48  1  1  1  1  1     5
-    ## 50   50  1  1  1  1  1     5
-    ## 52   52  1  1  1  1  1     5
-    ## 58   58  1  1  1  1  1     5
-    ## 59   59  1  1  1  1  1     5
-    ## 60   60  1  1  1  1  1     5
-    ## 67   67  1  1  1  1  1     5
-    ## 69   69  1  1  1  1  1     5
-    ## 71   71  1  1  1  1  1     5
-    ## 72   72  1  1  1  1  1     5
-    ## 75   75  1  1  1  1  1     5
-    ## 77   77  1  1  1  1  1     5
-    ## 78   78  1  1  1  1  1     5
-    ## 82   82  1  1  1  1  1     5
-    ## 88   88  1  1  1  1  1     5
-    ## 90   90  1  1  1  1  1     5
-    ## 91   91  1  1  1  1  1     5
-    ## 92   92  1  1  1  1  1     5
-    ## 96   96  1  1  1  1  1     5
-    ## 105 105  1  1  1  1  1     5
-    ## 111 111  1  1  1  1  1     5
-    ## 114 114  1  1  1  1  1     5
-    ## 115 115  1  1  1  1  1     5
-    ## 119 119  1  1  1  1  1     5
-    ## 122 122  1  1  1  1  1     5
-    ## 125 125  1  1  1  1  1     5
-    ## 129 129  1  1  1  1  1     5
-    ## 132 132  1  1  1  1  1     5
+```
+##      id     1     4     3     2     5 score
+## 13   13 FALSE FALSE FALSE FALSE FALSE     0
+## 22   22 FALSE FALSE FALSE FALSE FALSE     0
+## 46   46 FALSE FALSE FALSE FALSE FALSE     0
+## 51   51 FALSE FALSE FALSE FALSE FALSE     0
+## 54   54 FALSE FALSE FALSE FALSE FALSE     0
+## 57   57 FALSE FALSE FALSE FALSE FALSE     0
+## 64   64 FALSE FALSE FALSE FALSE FALSE     0
+## 66   66 FALSE FALSE FALSE FALSE FALSE     0
+## 73   73 FALSE FALSE FALSE FALSE FALSE     0
+## 80   80 FALSE FALSE FALSE FALSE FALSE     0
+## 85   85 FALSE FALSE FALSE FALSE FALSE     0
+## 94   94 FALSE FALSE FALSE FALSE FALSE     0
+## 97   97 FALSE FALSE FALSE FALSE FALSE     0
+## 99   99 FALSE FALSE FALSE FALSE FALSE     0
+## 101 101 FALSE FALSE FALSE FALSE FALSE     0
+## 104 104 FALSE FALSE FALSE FALSE FALSE     0
+## 116 116 FALSE FALSE FALSE FALSE FALSE     0
+## 121 121 FALSE FALSE FALSE FALSE FALSE     0
+## 123 123 FALSE FALSE FALSE FALSE FALSE     0
+## 127 127 FALSE FALSE FALSE FALSE FALSE     0
+## 17   17  TRUE FALSE FALSE FALSE FALSE     1
+## 40   40  TRUE FALSE FALSE FALSE FALSE     1
+## 41   41 FALSE FALSE FALSE FALSE  TRUE     1
+## 70   70  TRUE FALSE FALSE FALSE FALSE     1
+## 100 100  TRUE FALSE FALSE FALSE FALSE     1
+## 108 108 FALSE FALSE  TRUE FALSE FALSE     1
+## 2     2  TRUE  TRUE FALSE FALSE FALSE     2
+## 5     5  TRUE  TRUE FALSE FALSE FALSE     2
+## 7     7  TRUE  TRUE FALSE FALSE FALSE     2
+## 8     8 FALSE FALSE  TRUE  TRUE FALSE     2
+## 9     9  TRUE  TRUE FALSE FALSE FALSE     2
+## 15   15  TRUE  TRUE FALSE FALSE FALSE     2
+## 18   18  TRUE  TRUE FALSE FALSE FALSE     2
+## 26   26  TRUE  TRUE FALSE FALSE FALSE     2
+## 29   29  TRUE  TRUE FALSE FALSE FALSE     2
+## 34   34  TRUE  TRUE FALSE FALSE FALSE     2
+## 37   37  TRUE  TRUE FALSE FALSE FALSE     2
+## 45   45  TRUE  TRUE FALSE FALSE FALSE     2
+## 56   56  TRUE  TRUE FALSE FALSE FALSE     2
+## 61   61  TRUE  TRUE FALSE FALSE FALSE     2
+## 65   65  TRUE  TRUE FALSE FALSE FALSE     2
+## 74   74  TRUE  TRUE FALSE FALSE FALSE     2
+## 76   76 FALSE FALSE  TRUE  TRUE FALSE     2
+## 81   81  TRUE  TRUE FALSE FALSE FALSE     2
+## 83   83  TRUE  TRUE FALSE FALSE FALSE     2
+## 86   86  TRUE  TRUE FALSE FALSE FALSE     2
+## 89   89  TRUE FALSE  TRUE FALSE FALSE     2
+## 93   93  TRUE  TRUE FALSE FALSE FALSE     2
+## 107 107  TRUE  TRUE FALSE FALSE FALSE     2
+## 109 109  TRUE  TRUE FALSE FALSE FALSE     2
+## 112 112  TRUE  TRUE FALSE FALSE FALSE     2
+## 113 113  TRUE  TRUE FALSE FALSE FALSE     2
+## 120 120  TRUE FALSE FALSE  TRUE FALSE     2
+## 124 124  TRUE  TRUE FALSE FALSE FALSE     2
+## 30   30 FALSE  TRUE  TRUE  TRUE FALSE     3
+## 36   36  TRUE  TRUE FALSE  TRUE FALSE     3
+## 47   47  TRUE  TRUE  TRUE FALSE FALSE     3
+## 117 117  TRUE  TRUE FALSE FALSE  TRUE     3
+## 129 129  TRUE  TRUE  TRUE FALSE FALSE     3
+## 1     1  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 4     4  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 10   10  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 12   12  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 14   14  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 20   20  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 23   23  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 24   24  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 25   25  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 31   31  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 32   32  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 33   33  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 35   35  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 42   42  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 43   43  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 49   49  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 53   53  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 55   55  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 58   58  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 62   62  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 63   63  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 68   68  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 79   79  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 84   84  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 87   87  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 95   95  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 98   98  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 102 102  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 103 103  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 106 106  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 110 110  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 118 118  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 125 125  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 128 128  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 131 131  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 132 132  TRUE  TRUE  TRUE  TRUE FALSE     4
+## 3     3  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 6     6  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 11   11  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 16   16  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 19   19  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 21   21  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 27   27  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 28   28  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 38   38  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 39   39  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 44   44  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 48   48  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 50   50  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 52   52  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 59   59  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 60   60  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 67   67  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 69   69  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 71   71  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 72   72  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 75   75  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 77   77  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 78   78  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 82   82  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 88   88  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 90   90  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 91   91  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 92   92  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 96   96  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 105 105  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 111 111  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 114 114  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 115 115  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 119 119  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 122 122  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 126 126  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 130 130  TRUE  TRUE  TRUE  TRUE  TRUE     5
+## 133 133  TRUE  TRUE  TRUE  TRUE  TRUE     5
+```
 
 ### Violations
 
-``` r
+
+```r
 is_monotonic <- function(x) {
   all(diff(as.numeric(x)) <= 0)
 }
@@ -387,17 +402,20 @@ dh <- dg[order(dg$score), ]
 dh
 ```
 
-    ##      id X1 X4 X3 X2 X5 score monotonic
-    ## 41   41  0  0  0  0  1     1     FALSE
-    ## 108 108  0  0  1  0  0     1     FALSE
-    ## 8     8  0  0  1  1  0     2     FALSE
-    ## 76   76  0  0  1  1  0     2     FALSE
-    ## 89   89  1  0  1  0  0     2     FALSE
-    ## 120 120  1  0  0  1  0     2     FALSE
-    ## 36   36  1  1  0  1  0     3     FALSE
-    ## 117 117  1  1  0  0  1     3     FALSE
+```
+##      id     1     4     3     2     5 score monotonic
+## 41   41 FALSE FALSE FALSE FALSE  TRUE     1     FALSE
+## 108 108 FALSE FALSE  TRUE FALSE FALSE     1     FALSE
+## 8     8 FALSE FALSE  TRUE  TRUE FALSE     2     FALSE
+## 76   76 FALSE FALSE  TRUE  TRUE FALSE     2     FALSE
+## 89   89  TRUE FALSE  TRUE FALSE FALSE     2     FALSE
+## 120 120  TRUE FALSE FALSE  TRUE FALSE     2     FALSE
+## 30   30 FALSE  TRUE  TRUE  TRUE FALSE     3     FALSE
+## 36   36  TRUE  TRUE FALSE  TRUE FALSE     3     FALSE
+## 117 117  TRUE  TRUE FALSE FALSE  TRUE     3     FALSE
+```
 
-``` r
+```r
 print(
       xtable::xtable(dh[, 2:7], caption = "Participant answers that violate unidimensionality", 
                      label = "tab:viol", digits = 0),
@@ -408,52 +426,65 @@ print(
 
 ### unidim analysis
 
-``` r
+
+```r
 lv <- loevenize(as.matrix(d[, 2:6]))
 lv
 ```
 
-    ## $error_matrix
-    ##    col
-    ## row 1 2 3 4 5
-    ##   1 0 0 3 2 1
-    ##   2 0 0 4 3 1
-    ##   3 3 4 0 2 2
-    ##   4 2 3 2 0 2
-    ##   5 1 1 2 2 0
-    ## 
-    ## $expected_error_matrix
-    ##    col
-    ## row         1        2        3        4         5
-    ##   1  0.000000 18.76692 15.87970 14.25564  7.398496
-    ##   2 18.766917  0.00000 19.18797 17.22556  8.939850
-    ##   3 15.879699 19.18797  0.00000 26.72932 13.872180
-    ##   4 14.255639 17.22556 26.72932  0.00000 16.646617
-    ##   5  7.398496  8.93985 13.87218 16.64662  0.000000
-    ## 
-    ## $h_matrix
-    ##    col
-    ## row         1         2         3         4         5
-    ##   1 0.0000000 1.0000000 0.8110795 0.8597046 0.8648374
-    ##   2 1.0000000 0.0000000 0.7915361 0.8258402 0.8881413
-    ##   3 0.8110795 0.7915361 0.0000000 0.9251758 0.8558266
-    ##   4 0.8597046 0.8258402 0.9251758 0.0000000 0.8798555
-    ##   5 0.8648374 0.8881413 0.8558266 0.8798555 0.0000000
-    ## 
-    ## $h
-    ## [1] 0.8741365
-    ## 
-    ## $sum_errors
-    ## [1] 20
-    ## 
-    ## $sum_expected_errors
-    ## [1] 158.9023
+```
+## $error_matrix
+##    col
+## row 1 2 3 4 5
+##   1 0 1 4 3 1
+##   2 1 0 4 3 1
+##   3 4 4 0 2 2
+##   4 3 3 2 0 2
+##   5 1 1 2 2 0
+## 
+## $expected_error_matrix
+##    col
+## row         1         2        3        4         5
+##   1  0.000000 19.360902 15.22556 14.84962  7.518797
+##   2 19.360902  0.000000 18.27068 17.81955  9.022556
+##   3 15.225564 18.270677  0.00000 30.88722 15.639098
+##   4 14.849624 17.819549 30.88722  0.00000 16.240602
+##   5  7.518797  9.022556 15.63910 16.24060  0.000000
+## 
+## $h_matrix
+##    col
+## row         1         2         3         4         5
+##   1 0.0000000 0.9483495 0.7372840 0.7979747 0.8670000
+##   2 0.9483495 0.0000000 0.7810700 0.8316456 0.8891667
+##   3 0.7372840 0.7810700 0.0000000 0.9352483 0.8721154
+##   4 0.7979747 0.8316456 0.9352483 0.0000000 0.8768519
+##   5 0.8670000 0.8891667 0.8721154 0.8768519 0.0000000
+## 
+## $h
+## [1] 0.8604662
+## 
+## $sum_errors
+## [1] 23
+## 
+## $sum_expected_errors
+## [1] 164.8346
+```
+
+```r
+1-c(23, 18, 12)/ lv$sum_expected_errors
+```
+
+```
+## [1] 0.8604662 0.8907996 0.9271997
+```
 
 ### FA
 
-``` r
-fa1 <- factanal(d[,c(-1, -7)], 1)
-fa2 <- factanal(d[,c(-1, -7)], 2)
+
+```r
+d_num <- apply(d[, c(-1, -7)], 2, as.numeric)
+fa1 <- factanal(d_num, 1)
+fa2 <- factanal(d_num, 2)
 
 tab <- cbind(unclass(loadings(fa1)), unclass(loadings(fa2)))
 print(
@@ -465,16 +496,19 @@ print(
 tab
 ```
 
-    ##      Factor1   Factor1   Factor2
-    ## X1 0.9176135 0.3067621 0.8365763
-    ## X4 0.9596311 0.3224612 0.9439382
-    ## X3 0.6267584 0.7436943 0.3651334
-    ## X2 0.5772825 0.9632071 0.2297556
-    ## X5 0.3429633 0.4628628 0.1732022
+```
+##     Factor1   Factor1   Factor2
+## 1 0.5043532 0.2243658 0.9147548
+## 4 0.5830152 0.3340612 0.8422924
+## 3 0.9396848 0.9025577 0.2639481
+## 2 0.9607688 0.9221507 0.2805721
+## 5 0.4941331 0.4560955 0.1890938
+```
 
 ### plot
 
-``` r
+
+```r
 tab <- round(cor(d[, -c(1, 7)]), 2)
 
 a <- tril(lv$h_matrix, -1) # strict lower triangular matrix (omit diagonals)
@@ -488,12 +522,15 @@ xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
 dev.off()
 ```
 
-    ## png 
-    ##   2
+```
+## png 
+##   2
+```
 
-``` r
+```r
 plot(as.matrix(c), fmt.cell='%.2f', main = "", key = NULL,
 xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
+

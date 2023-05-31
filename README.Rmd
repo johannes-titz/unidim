@@ -128,7 +128,11 @@ print(xtable::xtable(res2, label = "tab:fa1",
 Load data
 
 ```{r}
-d <- read.csv2("data.csv")
+dorig <- read.csv2("data.csv")
+d <- dorig %>%
+  select(id, item_nmbr, correctness) %>%
+  pivot_wider(names_from = item_nmbr, values_from = correctness)
+```
 ```
 
 Find order, calculate socre, show df
@@ -172,9 +176,9 @@ lv
 ### FA
 
 ```{r}
-
-fa1 <- factanal(d[,c(-1, -7)], 1)
-fa2 <- factanal(d[,c(-1, -7)], 2)
+d_num <- apply(d[, c(-1, -7)], 2, as.numeric)
+fa1 <- factanal(d_num, 1)
+fa2 <- factanal(d_num, 2)
 
 tab <- cbind(unclass(loadings(fa1)), unclass(loadings(fa2)))
 print(
