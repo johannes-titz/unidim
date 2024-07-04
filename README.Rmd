@@ -238,6 +238,13 @@ lv
 1-c(23, 18, 12)/ lv$sum_expected_errors
 ```
 
+double check with mokken package:
+
+```{r unidim mokken, cache = T}
+d_numeric <- apply(d, 2, as.numeric)
+d_numeric <- d_numeric[, 2:6]
+mokken::coefH(d_numeric)
+```
 ### FA
 
 ```{r}
