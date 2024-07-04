@@ -25,7 +25,7 @@ I use librarian to manage dependencies, so please install it if you do not have 
 # install.packages("librarian")
 library(librarian)
 shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, 
-      Matrix, plot.matrix, simpleCache)
+      Matrix, plot.matrix, simpleCache, mokken)
 setCacheDir("cache")
 # use multiple cores
 cores <- round(parallel::detectCores() * 0.8)
