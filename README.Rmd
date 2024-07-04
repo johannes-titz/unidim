@@ -24,7 +24,9 @@ I use librarian to manage dependencies, so please install it if you do not have 
 ```{r prepare}
 # install.packages("librarian")
 library(librarian)
-shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, Matrix, plot.matrix)
+shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, 
+      Matrix, plot.matrix, simpleCache)
+setCacheDir("cache")
 # use multiple cores
 cores <- round(parallel::detectCores() * 0.8)
 # create vectors from phi matrix
@@ -33,6 +35,27 @@ vec_from_tbl <- function(a, b, c, d) {
   v1 <- rep(c(0, 1), colSums(mtrx))
   v2 <- rep(c(0, 1), rowSums(mtrx))
   cbind(v1, v2)
+}
+
+# create vectors from phi matrix
+vectors_from_crosstable <- function(freq_ct, n_cat = sqrt(length(freq_ct))) {
+  m <- matrix(freq_ct, ncol = n_cat)
+  #graph <- Kmisc::melt_(m)
+  graph <- reshape2::melt(m)
+  v1 <- rep(graph[,1], graph[,3])
+  v2 <- rep(graph[,2], graph[,3])
+  m2 <- cbind(v1, v2)
+  m2
+}
+# for trichotomous/polytomous
+stats <- function(freq_ct) {
+  if (sum(freq_ct != 0) == 1) return(cbind(H = NA, r = NA))
+  m <- vectors_from_crosstable(freq_ct)
+  if (any(var(m) == 0)) return(cbind(H = NA, r = NA))
+  # avoid calculating H
+  if (cor(m)[1,2] < 0) return(cbind(H = NA, r = NA))
+  H <- suppressWarnings(mokken::coefH(m, nice.output = F, results = F))
+  cbind(H = as.numeric(H$H), phi = cor(m)[1,2])
 }
 ```
 
