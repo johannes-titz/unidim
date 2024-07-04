@@ -281,6 +281,10 @@ tab
 ```{r}
 tab <- round(cor(d[, -c(1, 7)]), 2)
 
+# max corr, when H for item 5 is 1
+round(cor(d[-c(41, 117), -c(1, 7)]), 2)
+loevenize(as.matrix(d[-c(41, 117), -c(1, 7)]))
+
 a <- tril(lv$h_matrix, -1) # strict lower triangular matrix (omit diagonals)
 b <- triu(tab, 1) # strict upper triangular matrix
 c <- a + b
