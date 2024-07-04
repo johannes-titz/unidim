@@ -8,6 +8,8 @@ output:
     toc: true
 ---
 <!-- @myself: the paper is in 2022/fa_paper-->
+Last updated: `r Sys.Date()`
+
 This analysis accompanies the paper: Titz, J. The Relationship Between the Phi Coefficient and the Unidimensionality Index H: Improving Psychological Scaling From the Ground Up
 
 ```{r setup, include=FALSE}
