@@ -245,6 +245,20 @@ d_numeric <- apply(d, 2, as.numeric)
 d_numeric <- d_numeric[, 2:6]
 mokken::coefH(d_numeric)
 ```
+
+Explain violations, recalculate H:
+
+```{r unidim explain viol}
+d_cp <- d
+d_cp[89, 2+1] <- TRUE
+d_cp[30, 1+1] <- TRUE
+d_cp[36, 3+1] <- TRUE
+loevenize(as.matrix(d_cp[,2:6]))$h
+d_cp[41, 5+1] <- FALSE
+d_cp[117, 5+1] <- FALSE
+loevenize(as.matrix(d_cp[,2:6]))$h
+```
+
 ### FA
 
 ```{r}
