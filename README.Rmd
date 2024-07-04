@@ -1,5 +1,5 @@
 ---
-title: "Analysis for Titz: Are psychologists constructing their scales in the right way..."
+title: "Analysis for Titz: The Relationship between Phi and H"
 author: "Johannes Titz"
 date: "04/27/2023"
 #original date: "2/23/2022"
@@ -7,8 +7,8 @@ output:
   github_document:
     toc: true
 ---
-
-This analysis accompanies the paper: Titz, J. Are psychologists constructing their scales in the right way? Insights from studying perfect unidimensionality.
+<!-- @myself: the paper is in 2022/fa_paper-->
+This analysis accompanies the paper: Titz, J. The Relationship Between the Phi Coefficient and the Unidimensionality Index H: Improving Psychological Scaling From the Ground Up
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = F,
