@@ -192,7 +192,7 @@ print(xtable::xtable(res2, label = "tab:fa1",
 
 Load data
 
-```{r}
+```{r emp prepare}
 dorig <- read.csv2("data.csv")
 d <- dorig %>%
   select(id, item_nmbr, correctness) %>%
@@ -200,9 +200,9 @@ d <- dorig %>%
 ```
 ```
 
-Find order, calculate socre, show df
+Find order, calculate score, show df
 
-```{r}
+```{r emp order}
 o <- order(colMeans(d[,-1]), decreasing = TRUE)
 d <- d[, c(1, o+1)]
 d$score <- rowSums(d[, -1])
@@ -212,7 +212,7 @@ df[order(df$score), ]
 
 ### Violations
 
-```{r}
+```{r emp viol}
 is_monotonic <- function(x) {
   all(diff(as.numeric(x)) <= 0)
 }
@@ -232,7 +232,7 @@ print(
 
 ### unidim analysis
 
-```{r}
+```{r unidim h}
 lv <- loevenize(as.matrix(d[, 2:6]))
 lv
 1-c(23, 18, 12)/ lv$sum_expected_errors
@@ -261,7 +261,7 @@ loevenize(as.matrix(d_cp[,2:6]))$h
 
 ### FA
 
-```{r}
+```{r emp fa}
 d_num <- apply(d[, c(-1, -7)], 2, as.numeric)
 fa1 <- factanal(d_num, 1)
 fa2 <- factanal(d_num, 2)
@@ -278,7 +278,7 @@ tab
 
 ### plot
 
-```{r}
+```{r emp plot}
 tab <- round(cor(d[, -c(1, 7)]), 2)
 
 # max corr, when H for item 5 is 1
