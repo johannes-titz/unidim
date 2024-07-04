@@ -1,23 +1,30 @@
-Analysis for Titz: Are psychologists constructing their scales in the
-right way…
+Analysis for Titz: The Relationship between Phi and H
 ================
 Johannes Titz
 04/27/2023
 
 - [Part I: Theory](#part-i-theory)
   - [Prepare](#prepare)
-  - [Generate Data](#generate-data)
-  - [Plot](#plot)
+  - [dichotomous](#dichotomous)
+    - [Generate Data](#generate-data)
+    - [Plot](#plot)
+  - [trichotomous](#trichotomous)
+    - [Generate Data](#generate-data-1)
+    - [Plot](#plot-1)
   - [FA model](#fa-model)
 - [Part II: Empirical Example](#part-ii-empirical-example)
   - [Violations](#violations)
   - [unidim analysis](#unidim-analysis)
   - [FA](#fa)
-  - [plot](#plot-1)
+  - [plot](#plot-2)
 
-This analysis accompanies the paper: Titz, J. Are psychologists
-constructing their scales in the right way? Insights from studying
-perfect unidimensionality.
+<!-- @myself: the paper is in 2022/fa_paper-->
+
+Last updated: 2024-07-04
+
+This analysis accompanies the paper: Titz, J. The Relationship Between
+the Phi Coefficient and the Unidimensionality Index H: Improving
+Psychological Scaling From the Ground Up
 
 # Part I: Theory
 
@@ -29,7 +36,9 @@ not have it yet (uncomment the first line).
 ``` r
 # install.packages("librarian")
 library(librarian)
-shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, Matrix, plot.matrix)
+shelf(partitions, pbapply, tidyverse, psych, johannes-titz/zysno, xtable, 
+      Matrix, plot.matrix, simpleCache, mokken, dplyr)
+setCacheDir("cache")
 # use multiple cores
 cores <- round(parallel::detectCores() * 0.8)
 # create vectors from phi matrix
@@ -39,9 +48,32 @@ vec_from_tbl <- function(a, b, c, d) {
   v2 <- rep(c(0, 1), rowSums(mtrx))
   cbind(v1, v2)
 }
+
+# create vectors from phi matrix
+vectors_from_crosstable <- function(freq_ct, n_cat = sqrt(length(freq_ct))) {
+  m <- matrix(freq_ct, ncol = n_cat)
+  #graph <- Kmisc::melt_(m)
+  graph <- reshape2::melt(m)
+  v1 <- rep(graph[,1], graph[,3])
+  v2 <- rep(graph[,2], graph[,3])
+  m2 <- cbind(v1, v2)
+  m2
+}
+# for trichotomous/polytomous
+stats <- function(freq_ct) {
+  if (sum(freq_ct != 0) == 1) return(cbind(H = NA, r = NA))
+  m <- vectors_from_crosstable(freq_ct)
+  if (any(var(m) == 0)) return(cbind(H = NA, r = NA))
+  # avoid calculating H
+  if (cor(m)[1,2] < 0) return(cbind(H = NA, r = NA))
+  H <- suppressWarnings(mokken::coefH(m, nice.output = F, results = F))
+  cbind(H = as.numeric(H$H), phi = cor(m)[1,2])
+}
 ```
 
-## Generate Data
+## dichotomous
+
+### Generate Data
 
 ``` r
 n <- 200
@@ -70,7 +102,7 @@ grid_row <- grid %>%
   filter(phi >= 0, Var2 >= Var3) # error cell is b
 ```
 
-## Plot
+### Plot
 
 ``` r
 p <- ggplot(grid_row, aes(phi, h)) + 
@@ -87,6 +119,62 @@ p
 
 ``` r
 pdf("plots/phiH.pdf", width = 5, height = 5)
+p
+dev.off()
+```
+
+    ## png 
+    ##   2
+
+## trichotomous
+
+Note that the code is not very efficient and can likely be improved
+considerably.
+
+### Generate Data
+
+The following two chunks are highly resource-intensive, demanding
+substantial RAM and time to recreate or load due to the objects’
+uncompressed size of approximately 20 GB. Consequently, they are not
+executed by default. To recreate or load these chunks, adjust the chunk
+settings as needed. Ensure you have sufficient RAM available (e.g., on a
+server) before running them. If you prefer not to recreate the data, you
+can proceed to the subsequent chunk, which loads the final relevant
+statistics from the cache (default).
+
+``` r
+n <- 30
+# all combos, even the ones where phi is NA
+simpleCache("grid_poly", as.data.frame(as.matrix(compositions(n = n, m = 9))))
+```
+
+``` r
+simpleCache("poly", pbmcapply::pbmclapply(grid_poly, stats, mc.cores = 2))
+poly <- data.frame(matrix(unlist(poly2), ncol = 2, byrow = T))
+names(poly) <- c("H", "phi")
+```
+
+``` r
+simpleCache("grid_row_tri", poly[poly$phi >= 0, ])
+```
+
+### Plot
+
+``` r
+p <- ggplot(grid_row_tri, aes(phi, H)) +
+  #geom_point(alpha = 0.05) +
+  geom_hex(bins = 100, show.legend = FALSE) +
+  theme_classic() +
+  scale_x_continuous("Phi", breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous("H", breaks = seq(0, 1, 0.1) ) +
+  coord_fixed()
+p
+```
+
+![](README_files/figure-gfm/phihs%20tri-1.png)<!-- -->
+
+``` r
+pdf("plots/phiHPoly.pdf", width = 5, height = 5)
 p
 dev.off()
 ```
@@ -227,15 +315,15 @@ Load data
 ``` r
 dorig <- read.csv2("data.csv")
 d <- dorig %>%
-  select(id, item_nmbr, correctness) %>%
+  dplyr::select(id, item_nmbr, correctness) %>%
   pivot_wider(names_from = item_nmbr, values_from = correctness)
 ```
 
 
-    Find order, calculate socre, show df
+    Find order, calculate score, show df
 
 
-    ```r
+    ``` r
     o <- order(colMeans(d[,-1]), decreasing = TRUE)
     d <- d[, c(1, o+1)]
     d$score <- rowSums(d[, -1])
@@ -460,6 +548,54 @@ lv
 
     ## [1] 0.8604662 0.8907996 0.9271997
 
+double check with mokken package:
+
+``` r
+d_numeric <- apply(d, 2, as.numeric)
+d_numeric <- d_numeric[, 2:6]
+mokken::coefH(d_numeric)
+```
+
+    ## $Hij
+    ##   1       se      4       se      3       se      2       se      5       se     
+    ## 1                  0.948  (0.050)  0.737  (0.116)  0.798  (0.106)  0.867  (0.128)
+    ## 4  0.948  (0.050)                  0.781  (0.098)  0.832  (0.089)  0.889  (0.107)
+    ## 3  0.737  (0.116)  0.781  (0.098)                  0.935  (0.044)  0.872  (0.086)
+    ## 2  0.798  (0.106)  0.832  (0.089)  0.935  (0.044)                  0.877  (0.083)
+    ## 5  0.867  (0.128)  0.889  (0.107)  0.872  (0.086)  0.877  (0.083)                
+    ## 
+    ## $Hi
+    ##   Item H  se     
+    ## 1   0.842 (0.068)
+    ## 4   0.860 (0.050)
+    ## 3   0.850 (0.050)
+    ## 2   0.875 (0.047)
+    ## 5   0.876 (0.088)
+    ## 
+    ## $H
+    ## Scale H      se 
+    ##   0.860 (0.047)
+
+Explain violations, recalculate H:
+
+``` r
+d_cp <- d
+d_cp[89, 2+1] <- TRUE
+d_cp[30, 1+1] <- TRUE
+d_cp[36, 3+1] <- TRUE
+loevenize(as.matrix(d_cp[,2:6]))$h
+```
+
+    ## [1] 0.8880157
+
+``` r
+d_cp[41, 5+1] <- FALSE
+d_cp[117, 5+1] <- FALSE
+loevenize(as.matrix(d_cp[,2:6]))$h
+```
+
+    ## [1] 0.9242237
+
 ### FA
 
 ``` r
@@ -489,6 +625,58 @@ tab
 ``` r
 tab <- round(cor(d[, -c(1, 7)]), 2)
 
+# max corr, when H for item 5 is 1
+round(cor(d[-c(41, 117), -c(1, 7)]), 2)
+```
+
+    ##      1    4    3    2    5
+    ## 1 1.00 0.84 0.44 0.46 0.30
+    ## 4 0.84 1.00 0.53 0.54 0.34
+    ## 3 0.44 0.53 1.00 0.90 0.50
+    ## 2 0.46 0.54 0.90 1.00 0.52
+    ## 5 0.30 0.34 0.50 0.52 1.00
+
+``` r
+loevenize(as.matrix(d[-c(41, 117), -c(1, 7)]))
+```
+
+    ## $error_matrix
+    ##    col
+    ## row 1 2 3 4 5
+    ##   1 0 1 4 3 0
+    ##   2 1 0 4 3 0
+    ##   3 4 4 0 2 0
+    ##   4 3 3 2 0 0
+    ##   5 0 0 0 0 0
+    ## 
+    ## $expected_error_matrix
+    ##    col
+    ## row         1         2        3        4         5
+    ##   1  0.000000 18.687023 14.83969 14.47328  6.961832
+    ##   2 18.687023  0.000000 17.93130 17.48855  8.412214
+    ##   3 14.839695 17.931298  0.00000 30.15267 14.503817
+    ##   4 14.473282 17.488550 30.15267  0.00000 15.083969
+    ##   5  6.961832  8.412214 14.50382 15.08397  0.000000
+    ## 
+    ## $h_matrix
+    ##    col
+    ## row         1         2         3         4 5
+    ##   1 0.0000000 0.9464869 0.7304527 0.7927215 1
+    ##   2 0.9464869 0.0000000 0.7769264 0.8284592 1
+    ##   3 0.7304527 0.7769264 0.0000000 0.9336709 1
+    ##   4 0.7927215 0.8284592 0.9336709 0.0000000 1
+    ##   5 1.0000000 1.0000000 1.0000000 1.0000000 0
+    ## 
+    ## $h
+    ## [1] 0.8927677
+    ## 
+    ## $sum_errors
+    ## [1] 17
+    ## 
+    ## $sum_expected_errors
+    ## [1] 158.5344
+
+``` r
 a <- tril(lv$h_matrix, -1) # strict lower triangular matrix (omit diagonals)
 b <- triu(tab, 1) # strict upper triangular matrix
 c <- a + b
@@ -508,4 +696,10 @@ plot(as.matrix(c), fmt.cell='%.2f', main = "", key = NULL,
 xlab = "Item", ylab = "Item", col = sapply(seq(1, 0, -0.1), gray, alpha = 0.5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/emp%20plot-1.png)<!-- -->
+
+<!-- ## revelle unidim -->
+<!-- ```{r} -->
+<!-- librarian::shelf(psych) -->
+<!-- unidim(d[, -c(1, 7)])#, cor = "tet") -->
+<!-- ``` -->
