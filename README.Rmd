@@ -106,11 +106,51 @@ p
 dev.off()
 ```
 
+## trichotomous
+
+Note that the code is not very efficient and can likely be improved considerably.
+
+### Generate Data
+
+The following two chunks are highly resource-intensive, demanding substantial RAM and time to recreate or load due to the objects' uncompressed size of approximately 20 GB. Consequently, they are not executed by default. To recreate or load these chunks, adjust the chunk settings as needed. Ensure you have sufficient RAM available (e.g., on a server) before running them. If you prefer not to recreate the data, you can proceed to the subsequent chunk, which loads the final relevant statistics from the cache (default).
+
+```{r generate tri, eval=FALSE, cache=FALSE}
+n <- 30
+# all combos, even the ones where phi is NA
+simpleCache("grid_poly", as.data.frame(as.matrix(compositions(n = n, m = 9))))
+```
+
+```{r generate 2 tri, cache = F, eval=FALSE}
+simpleCache("poly", pbmcapply::pbmclapply(grid_poly, stats, mc.cores = 2))
+poly <- data.frame(matrix(unlist(poly2), ncol = 2, byrow = T))
+names(poly) <- c("H", "phi")
+```
+
+```{r filter tri}
+simpleCache("grid_row_tri", poly[poly$phi >= 0, ])
+```
+
+### Plot
+
+```{r phihs tri, cache = T}
+p <- ggplot(grid_row_tri, aes(phi, H)) +
+  #geom_point(alpha = 0.05) +
+  geom_hex(bins = 100, show.legend = FALSE) +
+  theme_classic() +
+  scale_x_continuous("Phi", breaks = seq(0, 1, 0.1)) +
+  scale_y_continuous("H", breaks = seq(0, 1, 0.1) ) +
+  coord_fixed()
+p
+pdf("plots/phiHPoly.pdf", width = 5, height = 5)
+p
+dev.off()
+```
+
 ## FA model
 
 It is not hard to create unidimensional model that results in a perfect bifactor solution with factor analysis (for Pearson Correlation):
 
-```{r}
+```{r fa}
 m1 <- vec_from_tbl(10, 80, 0, 10)
 m2 <- vec_from_tbl(11, 78, 0, 11)
 m3 <- vec_from_tbl(15, 70, 0, 15)
