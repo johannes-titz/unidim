@@ -59,9 +59,11 @@ stats <- function(freq_ct) {
 }
 ```
 
-## Generate Data
+## dichotomous
 
-```{r generate, cache = F}
+### Generate Data
+
+```{r generate dich, cache = F}
 n <- 200
 # all combos, even the ones where phi is NA
 grid <- as.matrix(t(compositions(n = n, m = 4)))
@@ -81,14 +83,14 @@ grid <- xfun::cache_rds({
 grid <- as_tibble(grid)
 ```
 
-```{r filter}
+```{r filter dich}
 grid_unidim <-  grid %>%
   filter(Var3 == 0) # only unidimensional
 grid_row <- grid %>%
   filter(phi >= 0, Var2 >= Var3) # error cell is b
 ```
 
-## Plot
+### Plot
 
 ```{r phihs}
 p <- ggplot(grid_row, aes(phi, h)) + 
